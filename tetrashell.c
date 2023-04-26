@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
 		char filePathToHack[FILENAME_MAX];	
 		char* prompt = "tetrashell> ";
 		char* tokens[MAX_TOKEN];
+		char** supportedCommands = {"exit", "modify", "rank", "check", "recover"};
 		while (isRunning) {
 			if (!fileSelected) {
         		printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
 					perror("Not a valid file path");
 				}
 			} else {
+				// Now that we have a file selected, we can start asking for commands
 				while (fileSelected) {
 					printf("%s", prompt);	
 					if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
@@ -74,6 +76,7 @@ int main(int argc, char** argv) {
 						printf("Goodbye!\n");
 						return EXIT_SUCCESS; 
 					}
+					
 				}
 			}
 		}
