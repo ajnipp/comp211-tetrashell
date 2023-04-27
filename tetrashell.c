@@ -114,7 +114,22 @@ int main(int argc, char** argv) {
 					}
 
 					if (strcmp(cmd, "modify") == 0) {
+						// need to implement
+                                                // use execv to call program to run (./modify)
+                                                // first argument is what to run, second argument is list of arguments
+                                                // Also need to use fork to override while loop with ./modify
+                                                // run execv in child
+                                                // use wait in parent to make it wait until child finishes
 
+                                                pid_t pid = fork();
+                                                char**
+
+                                                if (pid == 0) {
+                                                        // we know we are in our child process since fork returns 0 for child
+                                                        // use execve here to execute ./modify
+                                                        execv(tokens[0], tokens);
+
+                                        }
 					} else if (strcmp(cmd, "rank") == 0) {
 
 					} else if (strcmp(cmd, "recover") == 0) {
