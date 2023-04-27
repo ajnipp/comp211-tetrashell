@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
   char filePathToHack[FILENAME_MAX];
   char* prompt = "tetrashell> ";
   char* tokens[MAX_TOKEN];
-  char* supportedCommands[] = {"exit", "modify", "rank", "check", "recover"};
+  char* supportedCommands[] = {"exit", "modify", "rank", "check", "recover", "switch"};
   while (isRunning) {
     if (!fileSelected) {
       printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
         if (strcmp(cmd, "exit") == 0) {
           exit_shell();
         }
-
+	pid_t pid;
         if (strcmp(cmd, "modify") == 0) {
           // need to implement
           // use execv to call program to run (./modify)
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
           char* args[5] = {"./modify", tokens[1], tokens[2], filePathToHack,
                            NULL};
 
-          pid_t pid = fork();
+          pid = fork();
 
           if (pid == 0) {
             // we know we are in our child process since fork returns 0 for
@@ -150,7 +150,6 @@ int main(int argc, char** argv) {
             exit(0);
           } else {
             wait(NULL);
-            exit(0);
           }
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
@@ -162,9 +161,9 @@ int main(int argc, char** argv) {
           int my_pipes[2];
           pipe(my_pipes);
 
-          pid_t pid2 = fork();
+          pid = fork();
 
-          if (pid2 == 0) {
+          if (pid == 0) {
             close(my_pipes[1]);
             dup2(my_pipes[0], 0);
             execv("./rank", args2);
@@ -174,7 +173,6 @@ int main(int argc, char** argv) {
             write(my_pipes[1], filePathToHack, strlen(filePathToHack));
             close(my_pipes[1]);
             wait(NULL);
-            exit(0);
           }
         } else if (strcmp(cmd, "recover") == 0) {
           if (tokenCount != 2) {
@@ -185,14 +183,13 @@ int main(int argc, char** argv) {
 
           char* args3[3] = {"./recover", tokens[1], NULL};
 
-          pid_t pid3 = fork();
+          pid = fork();
 
-          if (pid3 == 0) {
+          if (pid == 0) {
             execv("./recover", args3);
             exit(0);
           } else {
             wait(NULL);
-            exit(0);
           }
         } else if (strcmp(cmd, "check") == 0) {
           if (tokenCount != 1) {
@@ -203,16 +200,23 @@ int main(int argc, char** argv) {
 
           char* args4[3] = {"./check", filePathToHack, NULL};
 
-          pid_t pid4 = fork();
+          pid = fork();
 
-          if (pid4 == 0) {
+          if (pid == 0) {
             execv("./check", args4);
             exit(0);
           } else {
             wait(NULL);
-            exit(0);
           }
-        }
+        } else if (strcmp(cmd, "check") == 0) {
+
+	      // Check if file path is accessible
+	      if (access(filePathToHack, F_OK) == 0) {
+		fileSelected = true;
+	      } else {
+		perror("Not a valid file path");
+	      }
+	}
       }
     }
   }
