@@ -123,6 +123,7 @@ int main(int argc, char** argv) {
           exit_shell();
         }
 	pid_t pid;
+	char** args;
         if (strcmp(cmd, "modify") == 0) {
           // need to implement
           // use execv to call program to run (./modify)
@@ -138,7 +139,7 @@ int main(int argc, char** argv) {
             continue;
           }
           // NULL-terminated args list for execve
-          char* args[5] = {"./modify", tokens[1], tokens[2], filePathToHack,
+          char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
                            NULL};
 
           pid = fork();
@@ -157,7 +158,7 @@ int main(int argc, char** argv) {
                    tokenCount - 1);
             continue;
           }
-          char* args2[5] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
+          char* args[] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
           int my_pipes[2];
           pipe(my_pipes);
 
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
           if (pid == 0) {
             close(my_pipes[1]);
             dup2(my_pipes[0], 0);
-            execv("./rank", args2);
+            execv("./rank", args);
             exit(0);
           } else {
             close(my_pipes[0]);
@@ -181,12 +182,12 @@ int main(int argc, char** argv) {
             continue;
           }
 
-          char* args3[3] = {"./recover", tokens[1], NULL};
+          char* args[] = {"./recover", tokens[1], NULL};
 
           pid = fork();
 
           if (pid == 0) {
-            execv("./recover", args3);
+            execv("./recover", args);
             exit(0);
           } else {
             wait(NULL);
@@ -198,23 +199,31 @@ int main(int argc, char** argv) {
             continue;
           }
 
-          char* args4[3] = {"./check", filePathToHack, NULL};
+          char* args[] = {"./check", filePathToHack, NULL};
 
           pid = fork();
 
           if (pid == 0) {
-            execv("./check", args4);
+            execv("./check", args);
             exit(0);
           } else {
             wait(NULL);
           }
-        } else if (strcmp(cmd, "check") == 0) {
-
+        } else if (strcmp(cmd, "switch") == 0) {
+		
+          if (tokenCount != 2) {
+            printf("Command 'switch' needs 1 argument but %d were provided!\n",
+                   tokenCount - 1);
+            continue;
+          }
+	  char* newFilePath = tokens[1];
 	      // Check if file path is accessible
-	      if (access(filePathToHack, F_OK) == 0) {
-		fileSelected = true;
+	      if (access(newFilePath, F_OK) == 0) {
+		      printf("Switched current save from '%s' to '%s'\n", filePathToHack, newFilePath);
+		      strcpy(filePathToHack, newFilePath);
 	      } else {
 		perror("Not a valid file path");
+		continue;
 	      }
 	}
       }
