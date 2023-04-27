@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define MAX_TOKEN 10
 
@@ -135,7 +137,7 @@ int main(int argc, char** argv) {
 		 continue;
 	}	 
 	  // NULL-terminated args list for execve
-	  char* args[3] = {tokens[1], tokens[2], NULL};
+	  char* args[4] = {tokens[1], tokens[2], filePathToHack, NULL};
 	  
           pid_t pid = fork();
 
@@ -143,7 +145,10 @@ int main(int argc, char** argv) {
             // we know we are in our child process since fork returns 0 for
             // child use execve here to execute ./modify
             execv("./modify", args);
-	      } else  
+			exit(0);
+	      } else {
+			wait(NULL);
+		  }
         } else if (strcmp(cmd, "rank") == 0) {
         } else if (strcmp(cmd, "recover") == 0) {
         } else if (strcmp(cmd, "check") == 0) {
