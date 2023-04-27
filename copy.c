@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 #define MAX_TOKEN 10
 
@@ -131,87 +131,82 @@ int main(int argc, char** argv) {
           // run execv in child
           // use wait in parent to make it wait until child finishes
 
-          // Check if number of args is correct
-          if (tokenCount != 3) {
-            printf("Command 'modify' needs 2 arguments but %d were provided!\n",
-                   tokenCount - 1);
-            continue;
-          }
-          // NULL-terminated args list for execve
-          char* args[5] = {"./modify", tokens[1], tokens[2], filePathToHack,
-                           NULL};
-
+	  // Check if number of args is correct
+	  if (tokenCount != 3) {
+		 printf("Command 'modify' needs 2 arguments but %d were provided!\n", tokenCount - 1);
+		 continue;
+	}	 
+	  // NULL-terminated args list for execve
+	  char* args[5] = {"./modify", tokens[1], tokens[2], filePathToHack, NULL};
+	  
           pid_t pid = fork();
 
-          if (pid == 0) {
+            if (pid == 0) {
             // we know we are in our child process since fork returns 0 for
             // child use execve here to execute ./modify
-            execv("./modify", args);
-            exit(0);
-          } else {
-            wait(NULL);
-            exit(0);
-          }
+            	execv("./modify", args);
+			exit(0);
+	    } else {
+			wait(NULL);
+			exit(0);
+		  }
         } else if (strcmp(cmd, "rank") == 0) {
-          if (tokenCount != 3) {
-            printf("Command 'rank' needs 2 arguments but %d were provided!\n",
-                   tokenCount - 1);
-            continue;
-          }
-          char* args2[5] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
-          int my_pipes[2];
-          pipe(my_pipes);
+	  if (tokenCount != 3) {
+	  	printf("Command 'rank' needs 2 arguments but %d were provided!\n", tokenCount - 1);
+		continue;
+	  }
+	  char* args2[5] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
+	  int my_pipes[2];
+  	  pipe(my_pipes);	  
 
-          pid_t pid2 = fork();
-
-          if (pid2 == 0) {
-            close(my_pipes[1]);
-            dup2(my_pipes[0], 0);
-            execv("./rank", args2);
-            exit(0);
-          } else {
-            close(my_pipes[0]);
-            write(my_pipes[1], filePathToHack, strlen(filePathToHack));
-            close(my_pipes[1]);
-            wait(NULL);
-            exit(0);
-          }
+	  pid_t pid2 = fork();
+	  
+	  if (pid2 == 0) {
+		close(my_pipes[1]);
+		dup2(my_pipes[0], 0);
+		execv("./rank", args2);
+		exit(0);
+	  } else {
+		close(my_pipes[0]);
+	        write(my_pipes[1], filePathToHack, strlen(filePathToHack));
+		close(my_pipes[1]);	
+	  	wait(NULL);
+		exit(0);
+	  }
         } else if (strcmp(cmd, "recover") == 0) {
-          if (tokenCount != 2) {
-            printf("Command 'recover' needs 1 argument but %d were provided!\n",
-                   tokenCount - 1);
-            continue;
-          }
+	  if (tokenCount != 2) {
+	  	printf("Command 'recover' needs 1 argument but %d were provided!\n", tokenCount - 1);
+		continue;
+	  }
 
-          char* args3[3] = {"./recover", tokens[1], NULL};
+	  char* args3[3] = {"./recover", tokens[1], NULL};
 
-          pid_t pid3 = fork();
+	  pid_t pid3 = fork();
 
-          if (pid3 == 0) {
-            execv("./recover", args3);
-            exit(0);
-          } else {
-            wait(NULL);
-            exit(0);
-          }
+	  if (pid3 == 0) {
+	  	execv("./recover", args3);
+		exit(0);
+	  } else {
+	  	wait(NULL);
+		exit(0);
+	  }
         } else if (strcmp(cmd, "check") == 0) {
-          if (tokenCount != 1) {
-            printf("Command 'check' takes no arguments, but you provided %d\n.",
-                   tokenCount - 1);
-            continue;
-          }
+	  if (tokenCount != 1) {
+	  	printf("Command 'check' takes no arguments, but you provided %d\n.", tokenCount - 1);
+		continue;
+	  }
 
-          char* args4[3] = {"./check", filePathToHack, NULL};
+	  char* args4[3] = {"./check", filePathToHack, NULL};
 
-          pid_t pid4 = fork();
+	  pid_t pid4 = fork();
 
-          if (pid4 == 0) {
-            execv("./check", args4);
-            exit(0);
-          } else {
-            wait(NULL);
-            exit(0);
-          }
+	  if (pid4 == 0) {
+	  	execv("./check", args4);
+		exit(0);
+	  } else {
+		wait(NULL);
+	        exit(0);	
+		}
         }
       }
     }
