@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 		 continue;
 	}	 
 	  // NULL-terminated args list for execve
-	  char* args[4] = {tokens[1], tokens[2], filePathToHack, NULL};
+	  char* args[5] = {"./modify", tokens[1], tokens[2], filePathToHack, NULL};
 	  
           pid_t pid = fork();
 
