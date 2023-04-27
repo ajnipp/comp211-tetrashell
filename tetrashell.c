@@ -9,6 +9,8 @@
 
 #define MAX_TOKEN 10
 
+int isMatchingCommand(char* input, char* command);
+
 int main(int argc, char** argv) {
 
         char buff[FILENAME_MAX];
@@ -31,7 +33,7 @@ int main(int argc, char** argv) {
 		char filePathToHack[FILENAME_MAX];	
 		char* prompt = "tetrashell> ";
 		char* tokens[MAX_TOKEN];
-		char** supportedCommands = {"exit", "modify", "rank", "check", "recover"};
+		char* supportedCommands[] = {"exit", "modify", "rank", "check", "recover"};
 		while (isRunning) {
 			if (!fileSelected) {
         		printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -61,24 +63,53 @@ int main(int argc, char** argv) {
 					char* token = strtok(buff, " ");
 					while( tokenCount < MAX_TOKEN && token != NULL) {
 						tokens[tokenCount] = token;
+						//printf("token: %d\n", (int) *(token));
 						token = strtok(NULL, " ");
 						tokenCount++;
+					}
+
+					if (tokens[0][0] == '\n') {
+						continue;
 					}
 					// Strip newline from last token
 					char* lastToken = tokens[tokenCount - 1];
 					lastToken[strlen(lastToken) - 1] = '\0';
-
-					if (tokenCount == 0) {
-						continue;
-					}
+					
 					char* cmd = tokens[0];
+					int commandCount = sizeof(supportedCommands) / sizeof(supportedCommands[0]);
+					int numMatchingCommands = 0;
+					char* matchingCommands[commandCount];
+					for (int i = 0; i < commandCount; i++) {
+						char* commandToMatch = supportedCommands[i];
+						if (isMatchingCommand(cmd, commandToMatch)) {
+							matchingCommands[numMatchingCommands] = commandToMatch;	
+							numMatchingCommands++;
+						}
+					}
+					printf("num matching: %d\n", numMatchingCommands);
 					if (strcmp(cmd, "exit") == 0) {
 						printf("Goodbye!\n");
 						return EXIT_SUCCESS; 
 					}
+
+					
+					
 					
 				}
 			}
 		}
 }
+
+int isMatchingCommand(char* input, char* command) {
+		char c;
+		int i = 0;
+		while (( c = input[i] ) != '\0') {
+			if ( c != command[i]) {
+				return 0;
+			}
+			i++;
+		}
+		return 1;
+}
+
 
