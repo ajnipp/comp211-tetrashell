@@ -67,7 +67,9 @@ int main(int argc, char** argv) {
 						token = strtok(NULL, " ");
 						tokenCount++;
 					}
-
+					
+					// If the user has entered nothing, just continue through the loop and prompt
+					// for input again
 					if (tokens[0][0] == '\n') {
 						continue;
 					}
@@ -86,7 +88,23 @@ int main(int argc, char** argv) {
 							numMatchingCommands++;
 						}
 					}
-					printf("num matching: %d\n", numMatchingCommands);
+
+					// Check if no commands match input
+					if (numMatchingCommands == 0) {
+						printf("No matches for command %s: please try entering another command\n", cmd);
+						continue;
+					}
+					
+					// Check if input matches more than one command
+					if (numMatchingCommands > 1) {
+						printf("Multiple matches for command '%s'. Could be any of the following: \n", cmd);
+						for (int i = 0; i < numMatchingCommands; i++) {
+							printf("%s\n", matchingCommands[i]);
+						}
+						continue;
+					}
+					
+					// printf("num matching: %d\n", numMatchingCommands);
 					if (strcmp(cmd, "exit") == 0) {
 						printf("Goodbye!\n");
 						return EXIT_SUCCESS; 
