@@ -9,6 +9,7 @@
 
 #define MAX_TOKEN 10
 
+void exit_shell();
 int isMatchingCommand(char* input, char* command);
 
 int main(int argc, char** argv) {
@@ -103,14 +104,24 @@ int main(int argc, char** argv) {
 						}
 						continue;
 					}
+
+					// Since the input matches one command, we can replace the input with the full text of that
+					// command for comparison
+					cmd = matchingCommands[0];
 					
-					// printf("num matching: %d\n", numMatchingCommands);
 					if (strcmp(cmd, "exit") == 0) {
-						printf("Goodbye!\n");
-						return EXIT_SUCCESS; 
+						exit_shell();
 					}
 
-					
+					if (strcmp(cmd, "modify") == 0) {
+
+					} else if (strcmp(cmd, "rank") == 0) {
+
+					} else if (strcmp(cmd, "recover") == 0) {
+
+					} else if (strcmp(cmd, "check") == 0) {
+
+					}
 					
 					
 				}
@@ -118,6 +129,10 @@ int main(int argc, char** argv) {
 		}
 }
 
+void exit_shell() {
+		printf("Goodbye!\n");
+		exit(0); 
+}
 int isMatchingCommand(char* input, char* command) {
 		char c;
 		int i = 0;
