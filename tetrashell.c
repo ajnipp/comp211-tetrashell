@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "tetris.h"
+
 #define MAX_TOKEN 10
 
 void exit_shell();
@@ -37,7 +39,8 @@ int main(int argc, char** argv) {
   char filePathToHack[FILENAME_MAX];
   char* prompt = "tetrashell> ";
   char* tokens[MAX_TOKEN];
-  char* supportedCommands[] = {"exit", "modify", "rank", "check", "recover", "switch", "help"};
+  char* supportedCommands[] = {"exit",    "modify", "rank", "check",
+                               "recover", "switch", "help", "info"};
   while (isRunning) {
     if (!fileSelected) {
       printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -122,8 +125,8 @@ int main(int argc, char** argv) {
         if (strcmp(cmd, "exit") == 0) {
           exit_shell();
         }
-	pid_t pid;
-	char** args;
+        pid_t pid;
+        char** args;
         if (strcmp(cmd, "modify") == 0) {
           // Check if number of args is correct
           if (tokenCount != 3) {
@@ -133,7 +136,7 @@ int main(int argc, char** argv) {
           }
           // NULL-terminated args list for execve
           char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
-                           NULL};
+                          NULL};
 
           pid = fork();
 
@@ -148,12 +151,16 @@ int main(int argc, char** argv) {
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
             if (tokenCount != 2) {
-	    	printf("Command 'rank' needs at least 1 argument, but %d were provided!\n", tokenCount - 1);
-		continue;
-	    } else {
-	    	// sets tokens[2] value for quick-rank since the user doesnt define one
-		tokens[2] = "10";
-	    }
+              printf(
+                  "Command 'rank' needs at least 1 argument, but %d were "
+                  "provided!\n",
+                  tokenCount - 1);
+              continue;
+            } else {
+              // sets tokens[2] value for quick-rank since the user doesnt
+              // define one
+              tokens[2] = "10";
+            }
           }
 
           char* args[] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
@@ -208,47 +215,92 @@ int main(int argc, char** argv) {
             wait(NULL);
           }
         } else if (strcmp(cmd, "switch") == 0) {
-		
           if (tokenCount != 2) {
             printf("Command 'switch' needs 1 argument but %d were provided!\n",
                    tokenCount - 1);
             continue;
           }
-	  char* newFilePath = tokens[1];
-	      // Check if file path is accessible
-	      if (access(newFilePath, F_OK) == 0) {
-		      printf("Switched current save from '%s' to '%s'\n", filePathToHack, newFilePath);
-		      strcpy(filePathToHack, newFilePath);
-	      } else {
-		perror("Not a valid file path");
-		continue;
-	      }
-	} else if (strcmp(cmd, "help") == 0) {
-	  
-	  if (tokenCount != 2) {
-	    printf("Command 'help' needs 1 argument but %d were provided!\n", tokenCount - 1);
-	    continue;
-	  }
-	  
-		  if (strcmp(tokens[1], "exit") == 0) {
-			  printf("This command calls the 'exit' program with no additonal arguments, causing the program to exit.\n");
-		  }
-		  else if (strcmp(tokens[1], "modify") == 0) {
-			  printf("This command calls the 'modify' program, passing in either 'score' or 'lines' as the first argument.\nIf you wish to modify the score of the quicksave, pass in score, similarly passing in lines will modify the lines of the quicksave.\nThe second argument is the count which you wish to modify the score or line to be.\nModify will then modify your quicksave to update the score or lines to your passed in count.\n");
-		  }
-		  else if (strcmp(tokens[1], "rank") == 0) {
-			  printf("This command calls the 'rank' progam.\nYou can choose to pass in either 'score' or 'lines' as the first argument, this is the criteria by which rank will list quicksaves by.\nThe second argument is the number of ranked quicksaves you would like to see printed.\n");
-		  }
-		  else if (strcmp(tokens[1], "check") == 0) {
-			  printf("This command calls the 'check' program with the current quicksave to verify if it will pass legitimacy checks.\n");
-		  }
-		  else if (strcmp(tokens[1], "switch") == 0) {
-			  printf("This command switches the current quicksave to the new quicksave found at the path you enter as the argument.\n");
-		  }
-		  else if (strcmp(tokens[1], "help") == 0) {
-			  printf("This command provides information on how to use the various commands in this tool!\nEnter the command as the argument.\nSome possible commands are 'exit', 'check', 'modify', etc.\n");
-		  }
-	}
+          char* newFilePath = tokens[1];
+          // Check if file path is accessible
+          if (access(newFilePath, F_OK) == 0) {
+            printf("Switched current save from '%s' to '%s'\n", filePathToHack,
+                   newFilePath);
+            strcpy(filePathToHack, newFilePath);
+          } else {
+            perror("Not a valid file path");
+            continue;
+          }
+        } else if (strcmp(cmd, "help") == 0) {
+          if (tokenCount != 2) {
+            printf("Command 'help' needs 1 argument but %d were provided!\n",
+                   tokenCount - 1);
+            continue;
+          }
+
+          if (strcmp(tokens[1], "exit") == 0) {
+            printf(
+                "This command calls the 'exit' program with no additonal "
+                "arguments, causing the program to exit.\n");
+          } else if (strcmp(tokens[1], "modify") == 0) {
+            printf(
+                "This command calls the 'modify' program, passing in either "
+                "'score' or 'lines' as the first argument.\nIf you wish to "
+                "modify the score of the quicksave, pass in score, similarly "
+                "passing in lines will modify the lines of the quicksave.\nThe "
+                "second argument is the count which you wish to modify the "
+                "score or line to be.\nModify will then modify your quicksave "
+                "to update the score or lines to your passed in count.\n");
+          } else if (strcmp(tokens[1], "rank") == 0) {
+            printf(
+                "This command calls the 'rank' progam.\nYou can choose to pass "
+                "in either 'score' or 'lines' as the first argument, this is "
+                "the criteria by which rank will list quicksaves by.\nThe "
+                "second argument is the number of ranked quicksaves you would "
+                "like to see printed.\n");
+          } else if (strcmp(tokens[1], "check") == 0) {
+            printf(
+                "This command calls the 'check' program with the current "
+                "quicksave to verify if it will pass legitimacy checks.\n");
+          } else if (strcmp(tokens[1], "switch") == 0) {
+            printf(
+                "This command switches the current quicksave to the new "
+                "quicksave found at the path you enter as the argument.\n");
+          } else if (strcmp(tokens[1], "help") == 0) {
+            printf(
+                "This command provides information on how to use the various "
+                "commands in this tool!\nEnter the command as the "
+                "argument.\nSome possible commands are 'exit', 'check', "
+                "'modify', etc.\n");
+          }
+        } else if (strcmp(cmd, "info") == 0) {
+          if (tokenCount != 1) {
+            printf("Command 'info' needs 0 arguments but %d were provided!\n",
+                   tokenCount - 1);
+            continue;
+          }
+
+          FILE* fp = fopen(filePathToHack, "r");
+
+          if (fp == NULL) {
+            printf("Error opening file '%s'!\n", filePathToHack);
+            fclose(fp);
+            continue;
+          }
+
+          TetrisGameState state;
+
+          if (fread(&state, sizeof(TetrisGameState), 1, fp) != 1) {
+            printf("Error reading file with fread!\n");
+            fclose(fp);
+            continue;
+          }
+
+          fclose(fp);
+
+          printf("Current savefile: %s\n", filePathToHack);
+          printf("Score: %u\n", state.score);
+          printf("Lines: %u\n", state.lines);
+        }
       }
     }
   }
