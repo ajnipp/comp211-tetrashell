@@ -37,10 +37,12 @@ int main(int argc, char** argv) {
   bool isRunning = true;
   bool fileSelected = false;
   char filePathToHack[FILENAME_MAX];
+  FILE* filePointerToHack;
   char* prompt = "tetrashell> ";
   char* tokens[MAX_TOKEN];
   char* supportedCommands[] = {"exit",    "modify", "rank", "check",
                                "recover", "switch", "help", "info"};
+  TetrisGameState oldGameState; // tracking it for undo
   while (isRunning) {
     if (!fileSelected) {
       printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -54,7 +56,9 @@ int main(int argc, char** argv) {
 
       // Check if file path is accessible
       if (access(filePathToHack, F_OK) == 0) {
+
         fileSelected = true;
+
       } else {
         perror("Not a valid file path");
       }
@@ -287,9 +291,9 @@ int main(int argc, char** argv) {
             continue;
           }
 
-          TetrisGameState state;
+          TetrisGameState currentGameState;
 
-          if (fread(&state, sizeof(TetrisGameState), 1, fp) != 1) {
+          if (fread(&currentGameState, sizeof(TetrisGameState), 1, fp) != 1) {
             printf("Error reading file with fread!\n");
             fclose(fp);
             continue;
@@ -298,8 +302,8 @@ int main(int argc, char** argv) {
           fclose(fp);
 
           printf("Current savefile: %s\n", filePathToHack);
-          printf("Score: %u\n", state.score);
-          printf("Lines: %u\n", state.lines);
+          printf("Score: %u\n", currentGameState.score);
+          printf("Lines: %u\n", currentGameState.lines);
         }
       }
     }
@@ -321,3 +325,5 @@ int isMatchingCommand(char* input, char* command) {
   }
   return 1;
 }
+
+
