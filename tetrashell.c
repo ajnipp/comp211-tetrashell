@@ -154,10 +154,15 @@ int main(int argc, char** argv) {
           }
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
-            printf("Command 'rank' needs 2 arguments but %d were provided!\n",
-                   tokenCount - 1);
-            continue;
+            if (tokenCount != 2) {
+	    	printf("Command 'rank' needs at least 1 argument, but %d were provided!\n", tokenCount - 1);
+		continue;
+	    } else {
+	    	// sets tokens[2] value for quick-rank since the user doesnt define one
+		tokens[2] = "10";
+	    }
           }
+
           char* args[] = {"./rank", tokens[1], tokens[2], "uplink", NULL};
           int my_pipes[2];
           pipe(my_pipes);
