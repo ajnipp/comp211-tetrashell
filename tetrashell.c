@@ -40,9 +40,11 @@ int main(int argc, char** argv) {
   FILE* filePointerToHack;
   char* prompt = "tetrashell> ";
   char* tokens[MAX_TOKEN];
-  char* supportedCommands[] = {"exit",    "modify", "rank", "check",
-                               "recover", "switch", "help", "info"};
-  TetrisGameState oldGameState; // tracking it for undo
+  char* supportedCommands[] = {"exit",   "modify", "rank", "check", "recover",
+                               "switch", "help",   "info", "undo"};
+  TetrisGameState currentGameState;
+  TetrisGameState oldGameState;  // tracking it for undo
+  bool isModified = false;
   while (isRunning) {
     if (!fileSelected) {
       printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -56,7 +58,6 @@ int main(int argc, char** argv) {
 
       // Check if file path is accessible
       if (access(filePathToHack, F_OK) == 0) {
-
         fileSelected = true;
 
       } else {
@@ -138,6 +139,24 @@ int main(int argc, char** argv) {
                    tokenCount - 1);
             continue;
           }
+
+          // Save the current state as the old state before modifying
+          FILE* fp = fopen(filePathToHack, "r");
+
+          if (fp == NULL) {
+            printf("Error opening file '%s'!\n", filePathToHack);
+            fclose(fp);
+            continue;
+          }
+
+          if (fread(&oldGameState, sizeof(TetrisGameState), 1, fp) != 1) {
+            printf("Error reading file with fread!\n");
+            fclose(fp);
+            continue;
+          }
+
+          fclose(fp);
+
           // NULL-terminated args list for execve
           char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
                           NULL};
@@ -152,6 +171,8 @@ int main(int argc, char** argv) {
           } else {
             wait(NULL);
           }
+          isModified = true;
+
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
             if (tokenCount != 2) {
@@ -291,8 +312,6 @@ int main(int argc, char** argv) {
             continue;
           }
 
-          TetrisGameState currentGameState;
-
           if (fread(&currentGameState, sizeof(TetrisGameState), 1, fp) != 1) {
             printf("Error reading file with fread!\n");
             fclose(fp);
@@ -304,6 +323,39 @@ int main(int argc, char** argv) {
           printf("Current savefile: %s\n", filePathToHack);
           printf("Score: %u\n", currentGameState.score);
           printf("Lines: %u\n", currentGameState.lines);
+        } else if (strcmp(cmd, "undo") == 0) {
+          if (tokenCount != 1) {
+            printf("Command 'undo' needs 0 arguments but %d were provided!\n",
+                   tokenCount - 1);
+            continue;
+          }
+
+          // Check if there haven't been any modifications
+          if (isModified == false) {
+            printf("No modifications have been made to undo!\n");
+            continue;
+          }
+
+          FILE* fp = fopen(filePathToHack, "w");
+
+          if (fp == NULL) {
+            printf("Error opening file '%s'!\n", filePathToHack);
+            fclose(fp);
+            continue;
+          }
+
+          // Write old game state to save file
+          if (fwrite(&oldGameState, sizeof(TetrisGameState), 1, fp) != 1) {
+            printf("Error writing to file with fwrite!\n");
+            fclose(fp);
+            continue;
+          }
+
+          fclose(fp);
+
+          printf("Last modification to '%s' has been undone.\n",
+                 filePathToHack);
+          isModified = false;
         }
       }
     }
@@ -325,5 +377,3 @@ int isMatchingCommand(char* input, char* command) {
   }
   return 1;
 }
-
-
