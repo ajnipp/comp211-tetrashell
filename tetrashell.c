@@ -1,6 +1,5 @@
-// I, Bailey Van Wormer (730472595), pledge that I have neither given nor
-// received unauthorized aid on this assignment. Collaborators: Alec Nipp
-// (alecjn) & Bailey Van Wormer (bvanwo)
+// I, Bailey Van Wormer (730472595), pledge that I have neither given nor received unauthorized aid on this assignment. 
+// Collaborators: Alec Nipp (alecjn) & Bailey Van Wormer (bvanwo)
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -22,14 +21,17 @@ int main(int argc, char** argv) {
 
   char* welcomeMessage =
       "Welcome to...\n"
+      "\033[38;5;208m"
       "                              (\n"
       "  *   )          )            )\\ )    )       (   (\n"
       "` )  /(   (   ( /( (       ) (()/( ( /(    (  )\\  )\\\n"
       "( )(_)) ))\\  )\\()))(   ( /(  /(_)))\\())  ))\\((_)((_)\n"
       "(_(_()) /((_)(_))/(()\\  )(_))(_)) ((_)\\  /((_)_   _\n"
+      "\033[38;5;51m"
       "|_   _|(_))  | |_  ((_)((_)_ / __|| |(_)(_)) | | | |\n"
       "  | |  / -_) |  _|| '_|/ _` |\\__ \\| ' \\ / -_)| | | |\n"
       "  |_|  \\___|  \\__||_|  \\__,_||___/|_||_|\\___||_| |_|\n"
+      "\033[0m]"
       "the ultimate Tetris quicksave hacking tool!\n";
 
   printf("%s", welcomeMessage);
@@ -59,12 +61,36 @@ int main(int argc, char** argv) {
       // Check if file path is accessible
       if (access(filePathToHack, F_OK) == 0) {
         fileSelected = true;
+	char* user = getlogin();
+	char name[64];
+	gethostname(name, 64);
 
+	FILE* fp = fopen(filePathToHack, "r");
+
+          if (fp == NULL) {
+            printf("Error opening file '%s'!\n", filePathToHack);
+            fclose(fp);
+            continue;
+          }
+
+	if (fread(&currentGameState, sizeof(TetrisGameState), 1, fp) != 1) {
+            printf("Error reading file with fread!\n");
+            fclose(fp);
+            continue;
+          }
+
+          fclose(fp);
+
+	printf("Here is some information on your quicksave:\n"
+		"Username: %s\n"
+		"Abbreviated Quicksave Name: %.4s...\n"
+		"Quicksave Score: %u\n"
+		"Quicksave Lines: %u\n"
+		"Machine Hostname: %s\n", user, filePathToHack, currentGameState.score, currentGameState.lines, name);
       } else {
         perror("Not a valid file path");
       }
     } else {
-      // Now that we have a file selected, we can start asking for commands
       while (fileSelected) {
         printf("%s", prompt);
         if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
@@ -75,13 +101,10 @@ int main(int argc, char** argv) {
         char* token = strtok(buff, " ");
         while (tokenCount < MAX_TOKEN && token != NULL) {
           tokens[tokenCount] = token;
-          // printf("token: %d\n", (int) *(token));
           token = strtok(NULL, " ");
           tokenCount++;
         }
 
-        // If the user has entered nothing, just continue through the loop and
-        // prompt for input again
         if (tokens[0][0] == '\n') {
           continue;
         }
@@ -102,7 +125,6 @@ int main(int argc, char** argv) {
           }
         }
 
-        // Check if no commands match input
         if (numMatchingCommands == 0) {
           printf(
               "No matches for command %s: please try entering another "
@@ -111,7 +133,6 @@ int main(int argc, char** argv) {
           continue;
         }
 
-        // Check if input matches more than one command
         if (numMatchingCommands > 1) {
           printf(
               "Multiple matches for command '%s'. Could be any of the "
@@ -123,8 +144,6 @@ int main(int argc, char** argv) {
           continue;
         }
 
-        // Since the input matches one command, we can replace the input with
-        // the full text of that command for comparison
         cmd = matchingCommands[0];
 
         if (strcmp(cmd, "exit") == 0) {
@@ -133,7 +152,6 @@ int main(int argc, char** argv) {
         pid_t pid;
         char** args;
         if (strcmp(cmd, "modify") == 0) {
-          // Check if number of args is correct
           if (tokenCount != 3) {
             printf("Command 'modify' needs 2 arguments but %d were provided!\n",
                    tokenCount - 1);
@@ -157,15 +175,12 @@ int main(int argc, char** argv) {
 
           fclose(fp);
 
-          // NULL-terminated args list for execve
           char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
                           NULL};
 
           pid = fork();
 
           if (pid == 0) {
-            // we know we are in our child process since fork returns 0 for
-            // child use execve here to execute ./modify
             execv("./modify", args);
             exit(0);
           } else {
@@ -182,8 +197,7 @@ int main(int argc, char** argv) {
                   tokenCount - 1);
               continue;
             } else {
-              // sets tokens[2] value for quick-rank since the user doesnt
-              // define one
+              // sets tokens[2] value for quick-rank
               tokens[2] = "10";
             }
           }
