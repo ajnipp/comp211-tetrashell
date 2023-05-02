@@ -63,14 +63,14 @@ Teammates: Bailey Van Wormer (bvanwo) & Alec Nipp (alecjn)
 	- Doing so will print out the first 10 quicksaves in the rankings list for your given argument
 
 ### Total Features
-**Core Commands** - 70 pts
-**Short Commands** - 5 pts
-**Quick-Rank** - 5pts
-**switch** - 5 pts
-**help** - 7 pts
-**info** - 5 pts
-**undo** - 15 pts
-
+**Core Commands** - 70 pts  
+**Short Commands** - 5 pts  
+**Quick-Rank** - 5pts  
+**switch** - 5 pts  
+**help** - 7 pts  
+**info** - 5 pts  
+**undo** - 15 pts  
+  
 ***Total*** = *112 pts*
 
 
