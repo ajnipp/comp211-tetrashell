@@ -274,7 +274,8 @@ int main(int argc, char** argv) {
                 "passing in lines will modify the lines of the quicksave.\nThe "
                 "second argument is the count which you wish to modify the "
                 "score or line to be.\nModify will then modify your quicksave "
-                "to update the score or lines to your passed in count.\n");
+                "to update the score or lines to your passed in count "
+                "value.\n");
           } else if (strcmp(tokens[1], "rank") == 0) {
             printf(
                 "This command calls the 'rank' progam.\nYou can choose to pass "
@@ -285,7 +286,8 @@ int main(int argc, char** argv) {
           } else if (strcmp(tokens[1], "check") == 0) {
             printf(
                 "This command calls the 'check' program with the current "
-                "quicksave to verify if it will pass legitimacy checks.\n");
+                "quicksave to verify if it will pass legitimacy checks.\nCheck "
+                "takes no arguments.\n");
           } else if (strcmp(tokens[1], "switch") == 0) {
             printf(
                 "This command switches the current quicksave to the new "
@@ -296,6 +298,29 @@ int main(int argc, char** argv) {
                 "commands in this tool!\nEnter the command as the "
                 "argument.\nSome possible commands are 'exit', 'check', "
                 "'modify', etc.\n");
+          } else if (strcmp(tokens[1], "info") == 0) {
+            printf(
+                "This command provides information on the current quicksave, "
+                "including the path to the quicksave, as well as its number of "
+                "scores and lines.\nTo use this command, simply enter the "
+                "'info' command with no arguments.\n");
+          } else if (strcmp(tokens[1], "recover") == 0) {
+            printf(
+                "This command calls the 'recover' program and returns a list "
+                "of recovered quicksaves from the disk image file path "
+                "specified by the passed in argument.\nThis command only takes "
+                "in 1 argument which is the path to the disk image file you "
+                "wish to recover quicksaves from.\n");
+          } else if (strcmp(tokens[1], "undo") == 0) {
+            printf(
+                "This command reverts the last modify command executed.\nFor "
+                "example, if score was previously 5, and you called modify "
+                "score 100, then called undo, the score would be reverted from "
+                "100 back to 5.\nundo does not take any arguments.\n");
+          } else {
+            printf(
+                "Command not recognized, try a new command.\nSee 'help help' "
+                "for a few possible commands.\n");
           }
         } else if (strcmp(cmd, "info") == 0) {
           if (tokenCount != 1) {
