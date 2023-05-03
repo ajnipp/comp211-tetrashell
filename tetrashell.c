@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
       "|_   _|(_))  | |_  ((_)((_)_ / __|| |(_)(_)) | | | |\n"
       "  | |  / -_) |  _|| '_|/ _` |\\__ \\| ' \\ / -_)| | | |\n"
       "  |_|  \\___|  \\__||_|  \\__,_||___/|_||_|\\___||_| |_|\n"
-      "\033[0m]"
+      "\033[0m"
       "the ultimate Tetris quicksave hacking tool!\n";
 
   printf("%s", welcomeMessage);
@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
   TetrisGameState oldGameState;  // tracking it for undo
   bool isModified = false;
 
+  char truncatedFileName[6];
 
   while (isRunning) {
     if (!fileSelected) {
@@ -73,6 +74,8 @@ int main(int argc, char** argv) {
 	if (readStateFromFile(&currentGameState, filePathToHack)) {
 		continue;
 	}
+	strncpy(truncatedFileName, filePathToHack, 5);
+	truncatedFileName[6] = '\0';
 
         fileSelected = true;
 
@@ -81,8 +84,8 @@ int main(int argc, char** argv) {
         perror("Not a valid file path");
       }
     } else {
-      while (fileSelected) {
-        printf("%s@%s[%s][%u/%u]> ", user, name, filePathToHack, currentGameState.score, currentGameState.lines);
+      while (fileSelected) {	
+        printf("%s@%s[%s...][%u/%u]> ", user, name, truncatedFileName, currentGameState.score, currentGameState.lines);
         if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
           fprintf(stderr, "Error reading input with fgets\n");
           return EXIT_SUCCESS;
@@ -244,6 +247,9 @@ int main(int argc, char** argv) {
             printf("Switched current save from '%s' to '%s'\n", filePathToHack,
                    newFilePath);
             strcpy(filePathToHack, newFilePath);
+	    strncpy(truncatedFileName, filePathToHack, 5);
+	    truncatedFileName[6] = '\0';
+	    // Update current state object
 	    readStateFromFile(&currentGameState, filePathToHack); 
           } else {
             perror("Not a valid file path");
