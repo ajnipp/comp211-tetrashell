@@ -177,6 +177,7 @@ int main(int argc, char** argv) {
             wait(NULL);
           }
           isModified = true;
+	  readStateFromFile(&currentGameState, filePathToHack); 
 
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
@@ -255,6 +256,7 @@ int main(int argc, char** argv) {
             printf("Switched current save from '%s' to '%s'\n", filePathToHack,
                    newFilePath);
             strcpy(filePathToHack, newFilePath);
+	    readStateFromFile(&currentGameState, filePathToHack); 
           } else {
             perror("Not a valid file path");
             continue;
@@ -333,21 +335,9 @@ int main(int argc, char** argv) {
             continue;
           }
 
-          FILE* fp = fopen(filePathToHack, "r");
-
-          if (fp == NULL) {
-            printf("Error opening file '%s'!\n", filePathToHack);
-            fclose(fp);
-            continue;
-          }
-
-          if (fread(&currentGameState, sizeof(TetrisGameState), 1, fp) != 1) {
-            printf("Error reading file with fread!\n");
-            fclose(fp);
-            continue;
-          }
-
-          fclose(fp);
+	if (readStateFromFile(&currentGameState, filePathToHack)) {
+		continue;
+	}
 
           printf("Current savefile: %s\n", filePathToHack);
           printf("Score: %u\n", currentGameState.score);
@@ -384,6 +374,7 @@ int main(int argc, char** argv) {
 
           printf("Last modification to '%s' has been undone.\n",
                  filePathToHack);
+	  readStateFromFile(&currentGameState, filePathToHack);
           isModified = false;
         }
       }
