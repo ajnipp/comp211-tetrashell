@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
       }
     } else {
       while (fileSelected) {
-        printf("%s@%s[%s...][%u/%u]> ", user, name, truncatedFileName,
+        printf("\033[38;5;51m%s@%s[%s...][%u/%u]>\033[0m ", user, name, truncatedFileName,
                currentGameState.score, currentGameState.lines);
         if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
           fprintf(stderr, "Error reading input with fgets\n");
