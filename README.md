@@ -65,9 +65,8 @@ Teammates: Bailey Van Wormer (bvanwo) & Alec Nipp (alecjn)
 ### Total Features
 **Core Commands** - 70 pts  
 **Short Commands** - 5 pts  
+**Improved Prompt** - 7 pts \
 **Quick-Rank** - 5pts  
-**Improved Prompt** - 7 pts
-
 **switch** - 5 pts  
 **help** - 7 pts  
 **info** - 5 pts  
