@@ -149,21 +149,9 @@ int main(int argc, char** argv) {
           }
 
           // Save the current state as the old state before modifying
-          FILE* fp = fopen(filePathToHack, "r");
-
-          if (fp == NULL) {
-            printf("Error opening file '%s'!\n", filePathToHack);
-            fclose(fp);
-            continue;
-          }
-
-          if (fread(&oldGameState, sizeof(TetrisGameState), 1, fp) != 1) {
-            printf("Error reading file with fread!\n");
-            fclose(fp);
-            continue;
-          }
-
-          fclose(fp);
+	  if(readStateFromFile(&oldGameState, filePathToHack)) {
+		  continue;
+	  }
 
           char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
                           NULL};
