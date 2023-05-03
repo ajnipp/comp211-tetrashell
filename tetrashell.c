@@ -15,6 +15,7 @@
 
 void exit_shell();
 int isMatchingCommand(char* input, char* command);
+int readStateFromFile(TetrisGameState* state, char* fileName);
 
 int main(int argc, char** argv) {
   char buff[FILENAME_MAX];
@@ -36,6 +37,12 @@ int main(int argc, char** argv) {
 
   printf("%s", welcomeMessage);
 
+
+  
+  char* user = getlogin();
+  char name[64];
+  gethostname(name, 64);
+
   bool isRunning = true;
   bool fileSelected = false;
   char filePathToHack[FILENAME_MAX];
@@ -47,6 +54,8 @@ int main(int argc, char** argv) {
   TetrisGameState currentGameState;
   TetrisGameState oldGameState;  // tracking it for undo
   bool isModified = false;
+
+
   while (isRunning) {
     if (!fileSelected) {
       printf("Enter the path to the quicksave you'd like to begin hacking: ");
@@ -60,39 +69,20 @@ int main(int argc, char** argv) {
 
       // Check if file path is accessible
       if (access(filePathToHack, F_OK) == 0) {
+
+	if (readStateFromFile(&currentGameState, filePathToHack)) {
+		continue;
+	}
+
         fileSelected = true;
-	char* user = getlogin();
-	char name[64];
-	gethostname(name, 64);
 
-	FILE* fp = fopen(filePathToHack, "r");
 
-          if (fp == NULL) {
-            printf("Error opening file '%s'!\n", filePathToHack);
-            fclose(fp);
-            continue;
-          }
-
-	if (fread(&currentGameState, sizeof(TetrisGameState), 1, fp) != 1) {
-            printf("Error reading file with fread!\n");
-            fclose(fp);
-            continue;
-          }
-
-          fclose(fp);
-
-	printf("Here is some information on your quicksave:\n"
-		"Username: %s\n"
-		"Abbreviated Quicksave Name: %.4s...\n"
-		"Quicksave Score: %u\n"
-		"Quicksave Lines: %u\n"
-		"Machine Hostname: %s\n", user, filePathToHack, currentGameState.score, currentGameState.lines, name);
       } else {
         perror("Not a valid file path");
       }
     } else {
       while (fileSelected) {
-        printf("%s", prompt);
+        printf("%s@%s[%s][%u/%u]> ", user, name, filePathToHack, currentGameState.score, currentGameState.lines);
         if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
           fprintf(stderr, "Error reading input with fgets\n");
           return EXIT_SUCCESS;
@@ -415,4 +405,25 @@ int isMatchingCommand(char* input, char* command) {
     i++;
   }
   return 1;
+}
+
+int readStateFromFile(TetrisGameState* state, char* fileName) {
+
+          FILE* fp = fopen(fileName, "r");
+
+          if (fp == NULL) {
+            printf("Error opening file '%s'!\n", fileName);
+            fclose(fp);
+            return 1;
+          }
+
+          if (fread(state, sizeof(TetrisGameState), 1, fp) != 1) {
+            printf("Error reading file with fread!\n");
+            fclose(fp);
+            return 1;
+          }
+
+          fclose(fp);
+	  return 0;
+
 }
