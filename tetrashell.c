@@ -1,5 +1,6 @@
-// I, Bailey Van Wormer (730472595), pledge that I have neither given nor received unauthorized aid on this assignment. 
-// Collaborators: Alec Nipp (alecjn) & Bailey Van Wormer (bvanwo)
+// I, Bailey Van Wormer (730472595), pledge that I have neither given nor
+// received unauthorized aid on this assignment. Collaborators: Alec Nipp
+// (alecjn) & Bailey Van Wormer (bvanwo)
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -37,11 +38,14 @@ int main(int argc, char** argv) {
 
   printf("%s", welcomeMessage);
 
-
-  
   char* user = getlogin();
   char name[64];
-  gethostname(name, 64);
+
+  // Default value of host name if it can't be fetched
+  if (gethostname(name, 64)) {
+    char* tshell = "TShell";
+    strcpy(name, tshell);
+  }
 
   bool isRunning = true;
   bool fileSelected = false;
@@ -70,22 +74,21 @@ int main(int argc, char** argv) {
 
       // Check if file path is accessible
       if (access(filePathToHack, F_OK) == 0) {
-
-	if (readStateFromFile(&currentGameState, filePathToHack)) {
-		continue;
-	}
-	strncpy(truncatedFileName, filePathToHack, 5);
-	truncatedFileName[6] = '\0';
+        if (readStateFromFile(&currentGameState, filePathToHack)) {
+          continue;
+        }
+        strncpy(truncatedFileName, filePathToHack, 5);
+        truncatedFileName[5] = '\0';
 
         fileSelected = true;
-
 
       } else {
         perror("Not a valid file path");
       }
     } else {
-      while (fileSelected) {	
-        printf("%s@%s[%s...][%u/%u]> ", user, name, truncatedFileName, currentGameState.score, currentGameState.lines);
+      while (fileSelected) {
+        printf("%s@%s[%s...][%u/%u]> ", user, name, truncatedFileName,
+               currentGameState.score, currentGameState.lines);
         if (fgets(buff, FILENAME_MAX, stdin) == NULL) {
           fprintf(stderr, "Error reading input with fgets\n");
           return EXIT_SUCCESS;
@@ -152,9 +155,9 @@ int main(int argc, char** argv) {
           }
 
           // Save the current state as the old state before modifying
-	  if(readStateFromFile(&oldGameState, filePathToHack)) {
-		  continue;
-	  }
+          if (readStateFromFile(&oldGameState, filePathToHack)) {
+            continue;
+          }
 
           char* args[] = {"./modify", tokens[1], tokens[2], filePathToHack,
                           NULL};
@@ -168,7 +171,7 @@ int main(int argc, char** argv) {
             wait(NULL);
           }
           isModified = true;
-	  readStateFromFile(&currentGameState, filePathToHack); 
+          readStateFromFile(&currentGameState, filePathToHack);
 
         } else if (strcmp(cmd, "rank") == 0) {
           if (tokenCount != 3) {
@@ -247,10 +250,10 @@ int main(int argc, char** argv) {
             printf("Switched current save from '%s' to '%s'\n", filePathToHack,
                    newFilePath);
             strcpy(filePathToHack, newFilePath);
-	    strncpy(truncatedFileName, filePathToHack, 5);
-	    truncatedFileName[6] = '\0';
-	    // Update current state object
-	    readStateFromFile(&currentGameState, filePathToHack); 
+            strncpy(truncatedFileName, filePathToHack, 5);
+            truncatedFileName[6] = '\0';
+            // Update current state object
+            readStateFromFile(&currentGameState, filePathToHack);
           } else {
             perror("Not a valid file path");
             continue;
@@ -329,9 +332,9 @@ int main(int argc, char** argv) {
             continue;
           }
 
-	if (readStateFromFile(&currentGameState, filePathToHack)) {
-		continue;
-	}
+          if (readStateFromFile(&currentGameState, filePathToHack)) {
+            continue;
+          }
 
           printf("Current savefile: %s\n", filePathToHack);
           printf("Score: %u\n", currentGameState.score);
@@ -368,7 +371,7 @@ int main(int argc, char** argv) {
 
           printf("Last modification to '%s' has been undone.\n",
                  filePathToHack);
-	  readStateFromFile(&currentGameState, filePathToHack);
+          readStateFromFile(&currentGameState, filePathToHack);
           isModified = false;
         }
       }
@@ -393,22 +396,20 @@ int isMatchingCommand(char* input, char* command) {
 }
 
 int readStateFromFile(TetrisGameState* state, char* fileName) {
+  FILE* fp = fopen(fileName, "r");
 
-          FILE* fp = fopen(fileName, "r");
+  if (fp == NULL) {
+    printf("Error opening file '%s'!\n", fileName);
+    fclose(fp);
+    return 1;
+  }
 
-          if (fp == NULL) {
-            printf("Error opening file '%s'!\n", fileName);
-            fclose(fp);
-            return 1;
-          }
+  if (fread(state, sizeof(TetrisGameState), 1, fp) != 1) {
+    printf("Error reading file with fread!\n");
+    fclose(fp);
+    return 1;
+  }
 
-          if (fread(state, sizeof(TetrisGameState), 1, fp) != 1) {
-            printf("Error reading file with fread!\n");
-            fclose(fp);
-            return 1;
-          }
-
-          fclose(fp);
-	  return 0;
-
+  fclose(fp);
+  return 0;
 }
